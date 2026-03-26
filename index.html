@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mohammed Ramees CK — Designer</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #161616;
+    --border: rgba(255,255,255,0.07);
+    --accent: #c8ff00;
+    --accent2: #ff4d6d;
+    --text: #f0f0f0;
+    --muted: #666;
+    --card: #131313;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, width 0.3s, height 0.3s, background 0.3s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    position: fixed;
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease, width 0.3s, height 0.3s, opacity 0.3s;
+    opacity: 0.5;
+  }
+  .cursor.expanded { width: 20px; height: 20px; }
+  .cursor-ring.expanded { width: 60px; height: 60px; opacity: 0.2; }
+
+  /* Noise grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0.4;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 28px 60px;
+    background: transparent;
+    transition: background 0.4s;
+  }
+  nav.scrolled { background: rgba(10,10,10,0.92); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 3px;
+    color: var(--accent);
+  }
+  .nav-links { display: flex; gap: 40px; list-style: none; }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 60px 80px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(rgba(10,10,10,0.85), rgba(10,10,10,0.85)), url('assets/hero_bg.png');
+    background-size: cover;
+    background-position: center;
+  }
+  .hero-bg-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(120px, 18vw, 280px);
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.03);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: 10px;
+  }
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 9vw, 130px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+  .hero-title .accent-line { color: var(--accent); display: block; }
+  .hero-sub {
+    margin-top: 32px;
+    max-width: 480px;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+  .hero-cta {
+    margin-top: 48px;
+    display: flex; gap: 20px; align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+  .btn-primary {
+    display: inline-block;
+    padding: 14px 36px;
+    background: var(--accent);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 700;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(200,255,0,0.25); }
+  .btn-ghost {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text); }
+  .hero-scroll-indicator {
+    position: absolute; right: 60px; bottom: 80px;
+    writing-mode: vertical-rl;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex; align-items: center; gap: 16px;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.2s forwards;
+  }
+  .hero-scroll-indicator::after {
+    content: '';
+    width: 1px; height: 60px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    display: block;
+  }
+
+  /* ─── SECTIONS ─── */
+  section { padding: 120px 60px; }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(40px, 6vw, 80px);
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+  .divider {
+    width: 100%; height: 1px;
+    background: var(--border);
+    margin: 0 60px;
+    width: calc(100% - 120px);
+  }
+
+  /* ─── ABOUT ─── */
+  #about { display: grid; grid-template-columns: 0.9fr 1.1fr 1fr; gap: 60px; align-items: flex-start; }
+  .about-img-wrap {
+    width: 100%; aspect-ratio: 10/14;
+    overflow: hidden;
+    border-radius: 2px; border: 1px solid var(--border);
+    position: relative;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+  }
+  .about-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: grayscale(0.15) contrast(1.05);
+    transition: transform 0.6s ease, filter 0.6s ease;
+  }
+  .about-img-wrap:hover .about-img { transform: scale(1.08); filter: grayscale(0) contrast(1.1); }
+  .about-text p {
+    margin-top: 28px;
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: rgba(240,240,240,0.65);
+    max-width: 500px;
+  }
+  .about-text p + p { margin-top: 16px; }
+  .about-stats { display: flex; flex-direction: column; gap: 2px; }
+  .stat-row {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-row::before {
+    content: '';
+    position: absolute; left: 0; bottom: 0;
+    width: 0; height: 1px;
+    background: var(--accent);
+    transition: width 0.6s ease;
+  }
+  .stat-row:hover::before { width: 100%; }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .stat-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* ─── PROJECTS ─── */
+  #projects { background: var(--bg2); }
+  .projects-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 64px; }
+  .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .project-card {
+    background: var(--card);
+    padding: 40px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s, border-color 0.4s;
+    cursor: none;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(200,255,0,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .project-card:hover { transform: translateY(-6px); border-color: rgba(200,255,0,0.2); }
+  .project-card:hover::before { opacity: 1; }
+  .project-card:nth-child(2) { margin-top: 40px; }
+  .project-card:nth-child(3) { margin-top: -20px; }
+  .project-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 60px;
+  }
+  .project-thumb {
+    width: 100%; aspect-ratio: 16/9;
+    border-radius: 2px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .project-thumb-inner {
+    width: 100%; height: 100%;
+    transition: transform 0.6s ease;
+    background-size: cover;
+    background-position: center;
+  }
+  .project-card:hover .project-thumb-inner { transform: scale(1.05); }
+  /* Project Thumbnails */
+  .thumb-1 { background-image: url('assets/project_nova.png'); }
+  .thumb-2 { background-image: url('assets/project_ember.png'); }
+  .thumb-3 { background-image: url('assets/project_verdant.png'); }
+  .project-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .project-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+  .project-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.65; }
+  .project-arrow {
+    position: absolute; bottom: 40px; right: 40px;
+    font-size: 1.4rem;
+    color: var(--border);
+    transition: color 0.3s, transform 0.3s;
+  }
+  .project-card:hover .project-arrow { color: var(--accent); transform: translate(4px, -4px); }
+
+  /* ─── SKILLS ─── */
+  #skills { display: grid; grid-template-columns: 1fr 2fr; gap: 80px; }
+  .skills-intro p {
+    margin-top: 24px;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: rgba(240,240,240,0.5);
+  }
+  .skills-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .skill-item {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .skill-item:nth-child(odd) { padding-right: 40px; border-right: 1px solid var(--border); }
+  .skill-item:nth-child(even) { padding-left: 40px; }
+  .skill-name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+  }
+  .skill-bar-wrap {
+    width: 80px; height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .skill-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.2s ease;
+  }
+  .skill-item.visible .skill-bar { width: var(--w); }
+
+  /* ─── STUDIO ─── */
+  #studio { background: var(--bg2); display: grid; grid-template-columns: 1.5fr 1fr; gap: 2px; padding: 0 60px; }
+  .studio-card {
+    height: 500px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .studio-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; transition: opacity 0.6s, transform 0.8s; }
+  .studio-card:hover .studio-img { opacity: 1; transform: scale(1.05); }
+  .studio-info {
+    position: absolute; bottom: 40px; left: 40px;
+    font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; color: var(--accent);
+  }
+
+  /* ─── CONTACT ─── */
+  #contact { background: var(--bg3); text-align: center; padding: 140px 60px; }
+  .contact-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(50px, 9vw, 120px);
+    letter-spacing: 4px;
+    line-height: 1;
+    margin: 24px 0 48px;
+  }
+  .contact-big span { color: var(--accent); }
+  .contact-links { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+  .contact-link {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 4px;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .contact-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 60px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: var(--muted);
+  }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 900px) {
+    nav { padding: 24px 28px; }
+    .nav-links { display: none; }
+    section, #hero { padding: 80px 28px; }
+    .divider { margin: 0 28px; width: calc(100% - 56px); }
+    #about { grid-template-columns: 1fr; gap: 48px; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card:nth-child(2), .project-card:nth-child(3) { margin-top: 0; }
+    #skills { grid-template-columns: 1fr; gap: 40px; }
+    .skills-grid { grid-template-columns: 1fr; }
+    .skill-item:nth-child(odd) { padding-right: 0; border-right: none; }
+    .skill-item:nth-child(even) { padding-left: 0; }
+    #hero { padding-bottom: 60px; }
+    .hero-scroll-indicator { display: none; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <div class="nav-logo">RAMEES.CK</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Work</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-text">DESIGN</div>
+  <div class="hero-eyebrow">Visual Designer & Creative Director</div>
+  <h1 class="hero-title">
+    Crafting Bold<br>
+    <span class="accent-line">Visual Stories.</span>
+  </h1>
+  <p class="hero-sub">I design brand identities, digital experiences, and visual systems that make people stop and feel something. Based in the world, working everywhere.</p>
+  <div class="hero-cta">
+    <a href="#projects" class="btn-primary">View Work</a>
+    <a href="#contact" class="btn-ghost">Get in Touch →</a>
+  </div>
+  <div class="hero-scroll-indicator">Scroll Down</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-img-wrap reveal">
+    <img src="assets/profile.jpg" alt="Mohammed Ramees CK" class="about-img">
+  </div>
+  <div class="about-text">
+    <div class="section-label reveal">01 — About</div>
+    <h2 class="section-title reveal reveal-delay-1">The Person<br>Behind the Work.</h2>
+    <p class="reveal reveal-delay-2">I'm Mohammed Ramees CK — a visual designer with 7+ years of experience shaping brands and digital products for startups, agencies, and global companies. I believe great design is invisible when it works, and unforgettable when it doesn't have to be.</p>
+    <p class="reveal reveal-delay-3">My process is rooted in research, driven by curiosity, and refined by relentless iteration. I care deeply about the details that most people never notice — because those are the ones that matter most.</p>
+  </div>
+  <div class="about-stats reveal">
+    <div class="stat-row">
+      <div class="stat-num">7+</div>
+      <div class="stat-desc">Years of<br>Experience</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-num">60+</div>
+      <div class="stat-desc">Projects<br>Completed</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-num">24</div>
+      <div class="stat-desc">Happy<br>Clients</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-num">3×</div>
+      <div class="stat-desc">Design<br>Awards</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="projects-header">
+    <div>
+      <div class="section-label reveal">02 — Work</div>
+      <h2 class="section-title reveal reveal-delay-1">Selected<br>Projects.</h2>
+    </div>
+    <a href="#contact" class="btn-ghost reveal">All Projects →</a>
+  </div>
+  <div class="projects-grid">
+    <div class="project-card reveal">
+      <div class="project-num">001</div>
+      <div class="project-thumb"><div class="project-thumb-inner thumb-1"></div></div>
+      <div class="project-tag">Brand Identity</div>
+      <div class="project-name">Nova Collective</div>
+      <p class="project-desc">Complete visual identity for a tech-forward creative agency — logo, guidelines, motion system, and digital touchpoints.</p>
+      <div class="project-arrow">↗</div>
+    </div>
+    <div class="project-card reveal reveal-delay-1">
+      <div class="project-num">002</div>
+      <div class="project-thumb"><div class="project-thumb-inner thumb-2"></div></div>
+      <div class="project-tag">UI / UX Design</div>
+      <div class="project-name">Ember Finance</div>
+      <p class="project-desc">End-to-end product design for a fintech app — from wireframes to a polished design system used by 50k+ users.</p>
+      <div class="project-arrow">↗</div>
+    </div>
+    <div class="project-card reveal reveal-delay-2">
+      <div class="project-num">003</div>
+      <div class="project-thumb"><div class="project-thumb-inner thumb-3"></div></div>
+      <div class="project-tag">Art Direction</div>
+      <div class="project-name">Verdant Campaign</div>
+      <p class="project-desc">Art direction and visual storytelling for a global sustainability campaign across print, digital, and OOH formats.</p>
+      <div class="project-arrow">↗</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="skills-intro">
+    <div class="section-label reveal">03 — Skills</div>
+    <h2 class="section-title reveal reveal-delay-1">Tools &<br>Craft.</h2>
+    <p class="reveal reveal-delay-2">A blend of strategic thinking and hands-on craft. I work across brand, digital, and print — always with an eye on the bigger picture.</p>
+  </div>
+  <div class="skills-grid reveal">
+    <div class="skill-item" style="--w:95%"><span class="skill-name">Brand Identity</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:90%"><span class="skill-name">UI / UX Design</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:88%"><span class="skill-name">Typography</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:85%"><span class="skill-name">Motion Design</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:92%"><span class="skill-name">Figma</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:80%"><span class="skill-name">Illustrator</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:75%"><span class="skill-name">After Effects</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+    <div class="skill-item" style="--w:82%"><span class="skill-name">Art Direction</span><div class="skill-bar-wrap"><div class="skill-bar"></div></div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STUDIO GALLERY -->
+<section id="studio" style="padding: 120px 60px;">
+  <div class="studio-card reveal">
+    <img src="assets/studio_2.png" alt="Studio Setup" class="studio-img">
+    <div class="studio-info">SYSTEMS & TOOLS</div>
+  </div>
+  <div class="studio-card reveal reveal-delay-1">
+    <img src="assets/studio_1.png" alt="Studio Interaction" class="studio-img">
+    <div class="studio-info">PROCESS & CRAFT</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label reveal">04 — Contact</div>
+  <div class="contact-big reveal reveal-delay-1">Let's Make<br>Something <span>Great.</span></div>
+  <p class="reveal reveal-delay-2" style="color:var(--muted);font-size:1rem;margin-bottom:48px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.75;">Open to freelance projects, full-time opportunities, and creative collaborations. Don't be a stranger.</p>
+  <div class="contact-links reveal reveal-delay-3">
+    <a href="mailto:hello@ramees.design" class="contact-link">hello@ramees.design</a>
+    <a href="#" class="contact-link">LinkedIn</a>
+    <a href="#" class="contact-link">Dribbble</a>
+    <a href="#" class="contact-link">Instagram</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">RAMEES.CK</div>
+  <div class="footer-copy">© 2025 Mohammed Ramees CK — All Rights Reserved</div>
+</footer>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  function animCursor() {
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+    rx += (mx - rx) * 0.15; ry += (my - ry) * 0.15;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    requestAnimationFrame(animCursor);
+  }
+  animCursor();
+  document.querySelectorAll('a, button, .project-card, .stat-row').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.classList.add('expanded'); ring.classList.add('expanded'); });
+    el.addEventListener('mouseleave', () => { cursor.classList.remove('expanded'); ring.classList.remove('expanded'); });
+  });
+
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Intersection observer for reveal animations
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
+
+  // Skill bars visibility
+  const skillEls = document.querySelectorAll('.skill-item');
+  const skillIO = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.2 });
+  skillEls.forEach(el => skillIO.observe(el));
+</script>
+</body>
+</html>
